@@ -35,27 +35,22 @@ df_bellevue = pd.read_csv(url)
 def task_1():
     """
     Return a list of all column names, sorted by missing values (least -> most).
-    Fixes gender column issue.
-    Preserves original column order for ties.
+    Preserves original column order when counts are tied.
+    Fix gender column issue.
     """
     df = df_bellevue.copy()
 
-    # Clean gender column
+    # Count missing values BEFORE cleaning
+    missing_counts = df.isna().sum()
+
+    # Sort columns by missing count, stable sort preserves original order for ties
+    sorted_cols = missing_counts.sort_values(kind="stable").index.tolist()
+
+    # Now fix gender column in the original DataFrame (for downstream tasks)
     if "gender" in df.columns:
         df["gender"] = df["gender"].astype(str).str.strip().str.upper()
         print("Cleaned gender column: stripped spaces and uppercased values.")
 
-    # Count missing values
-    missing_counts = df.isna().sum()
-
-    # Create a DataFrame with original column order preserved
-    col_order = pd.DataFrame({
-        "col": df.columns,
-        "missing": missing_counts[df.columns].values  # preserves original order
-    })
-
-    # Sort by missing count (ascending), stable sort preserves original order for ties
-    sorted_cols = col_order.sort_values(by="missing", kind="stable")["col"].tolist()
     return sorted_cols
 
 # Task 2
