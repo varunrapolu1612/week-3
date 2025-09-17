@@ -24,32 +24,32 @@ def to_binary(n):
 
 
 def task_1():
-
     #Load csv file
     url = 'https://github.com/melaniewalsh/Intro-Cultural-Analytics/raw/master/book/data/bellevue_almshouse_modified.csv'
 
     df_bellevue = pd.read_csv(url)
-  
-    #Return a list of all column names, sorted by the number of missing values.
 
-    df = df_bellevue.copy()
-
-    # Clean gender column: sometimes might be inconsistent, e.g. 'M ', 'F', etc.
-    if 'gender' in df.columns:
-        df['gender'] = df['gender'].str.strip().str.upper()
+    # Clean gender column
+    if 'gender' in df_bellevue.columns:
+        df_bellevue['gender'] = df_bellevue['gender'].astype(str).str.strip().str.upper()
         #print("Cleaned gender column: stripped spaces and uppercased values.")
 
     # Count missing values
-    missing_counts = df.isna().sum()
+    missing_counts = df_bellevue.isna().sum()
 
-    # Sort columns by missing value counts
-    sorted_cols = missing_counts.sort_values(ascending=True).index.tolist()
+    # Create DataFrame with counts and column names
+    col_info = pd.DataFrame({
+        "col": missing_counts.index,
+        "missing": missing_counts.values
+    })
+
+    # Sort by missing values, then alphabetically (to break ties)
+    sorted_cols = col_info.sort_values(
+        by=["missing", "col"],
+        ascending=[True, True]
+    )["col"].tolist()
+
     return sorted_cols
-
-
-
-
-
 
 
 
