@@ -24,6 +24,11 @@ def to_binary(n):
 
 
 def task_1():
+
+    #Load csv file
+    url = 'https://github.com/melaniewalsh/Intro-Cultural-Analytics/raw/master/book/data/bellevue_almshouse_modified.csv'
+
+    df_bellevue = pd.read_csv(url)
   
     #Return a list of all column names, sorted by the number of missing values.
 
