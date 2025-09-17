@@ -23,6 +23,26 @@ def to_binary(n):
 #EXERCOSE: 3
 
 
+def task_1():
+  
+    #Return a list of all column names, sorted by the number of missing values.
+
+    df = df_bellevue.copy()
+
+    # Clean gender column: sometimes might be inconsistent, e.g. 'M ', 'F', etc.
+    if 'gender' in df.columns:
+        df['gender'] = df['gender'].str.strip().str.upper()
+        print("Cleaned gender column: stripped spaces and uppercased values.")
+
+    # Count missing values
+    missing_counts = df.isna().sum()
+
+    # Sort columns by missing value counts
+    sorted_cols = missing_counts.sort_values(ascending=True).index.tolist()
+    return sorted_cols
+
+
+
 
 
 
