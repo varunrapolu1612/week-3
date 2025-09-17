@@ -37,7 +37,7 @@ def task_1():
     # Clean gender column: sometimes might be inconsistent, e.g. 'M ', 'F', etc.
     if 'gender' in df.columns:
         df['gender'] = df['gender'].str.strip().str.upper()
-        print("Cleaned gender column: stripped spaces and uppercased values.")
+        #print("Cleaned gender column: stripped spaces and uppercased values.")
 
     # Count missing values
     missing_counts = df.isna().sum()
