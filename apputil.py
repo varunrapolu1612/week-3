@@ -57,17 +57,27 @@ def task_1():
 def task_2():
     """
     Return a dataframe with year and total_admissions per year.
+    Extracts year from 'date_in'.
     """
     df = df_bellevue.copy()
 
     if "year" not in df.columns:
-        print("Warning: No 'year' column found in dataset.")
-        return pd.DataFrame(columns=["year", "total_admissions"])
+        if "date_in" in df.columns:
+            # Convert to datetime
+            df["date_in"] = pd.to_datetime(df["date_in"], errors="coerce")
+            # Drop rows where date_in could not be parsed
+            df = df.dropna(subset=["date_in"])
+            df["year"] = df["date_in"].dt.year
+        else:
+            print("Error: No 'year' or 'date_in' column found.")
+            return pd.DataFrame(columns=["year", "total_admissions"])
 
     admissions = (
         df.groupby("year")
           .size()
           .reset_index(name="total_admissions")
+          .sort_values("year")  # sort by year ascending
+          .reset_index(drop=True)
     )
     return admissions
 
@@ -95,17 +105,28 @@ def task_3():
 def task_4():
     """
     Return a list of the 5 most common professions in order of prevalence.
+    Ignores missing values.
     """
     df = df_bellevue.copy()
 
     if "profession" not in df.columns:
-        print("Warning: No 'profession' column found in dataset.")
+        print("Warning: No 'profession' column found.")
         return []
 
-    df["profession"] = df["profession"].astype(str).str.strip().str.lower()
-    print("Cleaned profession column: lowercased and stripped whitespace.")
+    # Strip and lowercase, but keep NaN as NaN
+    df["profession_clean"] = df["profession"].str.strip().str.lower()
 
-    common_prof = df["profession"].value_counts().head(5).index.tolist()
+    # Drop missing values before counting
+    common_prof = (
+        df["profession_clean"]
+        .dropna()
+        .value_counts()
+        .head(5)
+        .index
+        .tolist()
+    )
+
+    print("Cleaned profession column: lowercased and stripped whitespace (NaNs ignored).")
     return common_prof
 
 
