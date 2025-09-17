@@ -47,8 +47,9 @@ def task_1():
     # Count missing values
     missing_counts = df.isna().sum()
 
-    # Sort columns by missing count while keeping original order in case of tie
-    sorted_cols = sorted(df.columns, key=lambda x: missing_counts[x])
+    # Use stable sort to preserve original column order in case of tie
+    sorted_cols = missing_counts.sort_values(kind="stable").index.tolist()
+
     return sorted_cols
 
 # Task 2
