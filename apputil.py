@@ -1,133 +1,83 @@
 import seaborn as sns
 import pandas as pd
+import numpy as np
 
-#EXERCOSE: 1
+# update/add code below ...
 
 def fibonacci(n):
-    if n <= 1:
-        return n
+    """
+    This funtion is a recurisve function that will return the nth number of fibonacci series for a given n
+    Parameters:
+    n: It is the position of a number in fibonacci series, it is a non-negative integer.
+    Returns:
+    This function will return the nth number of fibonacci series for a given n
+    """
+   
+    if n<=0:
+        return 0
+    elif n == 1:
+        return 1
     else:
-        return fibonacci(n - 1) + fibonacci(n - 2)
-
-#EXERCOSE: 2
+        return fibonacci(n-1) + fibonacci(n-2)
+    
+def fib(n):
+    fibonacci_series = [fibonacci(i) for i in  range(n+1)]
+    return(fibonacci_series[n])
 
 def to_binary(n):
-    # Base case
+    """
+    This is a recursive function that converts an integer into its binary representation.
+    Parameters:
+    n: It is a non-negative integer to convert into binary representation.
+    Returns:
+    This function will return binary representation of a given number n 
+    """
+    
     if n == 0:
-        return "0"
-    elif n == 1:
-        return "1"
-    else:
-        return to_binary(n // 2) + str(n % 2)
-
-#EXERCOSE: 3
+        return '0'
+    if n == 1:
+        return '1'
+    
+    return to_binary(n // 2) + str(n % 2)
 
 
-import pandas as pd
-
-#Load csv file
 url = 'https://github.com/melaniewalsh/Intro-Cultural-Analytics/raw/master/book/data/bellevue_almshouse_modified.csv'
-
 df_bellevue = pd.read_csv(url)
-
-# Task 1
+df_bellevue.replace("", np.nan, inplace=True)
 
 def task_1():
     """
-    Return a list of all column names, sorted by missing values (least -> most).
-    Preserves original column order when counts are tied.
-    Fix gender column issue.
+    This function returns list of all columns sorted in ascending order of least missing values. 
     """
-    df = df_bellevue.copy()
+    temp_df = df_bellevue
+    temp_df['gender'] = temp_df['gender'].replace(['?', 'g', 'h'], np.nan)
 
-    # Count missing values BEFORE cleaning
-    missing_counts = df.isna().sum()
-
-    # Sort columns by missing count, stable sort preserves original order for ties
-    sorted_cols = missing_counts.sort_values(kind="stable").index.tolist()
-
-    # Now fix gender column in the original DataFrame (for downstream tasks)
-    if "gender" in df.columns:
-        df["gender"] = df["gender"].astype(str).str.strip().str.upper()
-        print("Cleaned gender column: stripped spaces and uppercased values.")
-
-    return sorted_cols
-
-# Task 2
+    column_null_count = temp_df.isnull().sum().to_dict()
+    
+    sorted_column_null_count = dict(sorted(column_null_count.items(), key=lambda item: item[1]))
+    column_list = list(sorted_column_null_count.keys())
+    return column_list
 
 def task_2():
     """
-    Return a dataframe with year and total_admissions per year.
-    Extracts year from 'date_in'.
-    """
-    df = df_bellevue.copy()
-
-    if "year" not in df.columns:
-        if "date_in" in df.columns:
-            # Convert to datetime
-            df["date_in"] = pd.to_datetime(df["date_in"], errors="coerce")
-            # Drop rows where date_in could not be parsed
-            df = df.dropna(subset=["date_in"])
-            df["year"] = df["date_in"].dt.year
-        else:
-            print("Error: No 'year' or 'date_in' column found.")
-            return pd.DataFrame(columns=["year", "total_admissions"])
-
-    admissions = (
-        df.groupby("year")
-          .size()
-          .reset_index(name="total_admissions")
-          .sort_values("year")  # sort by year ascending
-          .reset_index(drop=True)
-    )
-    return admissions
-
-
-
-# Task 2
+    This function returns a Dataframe with two columns "year" and "total admissions" corresponding to each year. 
+  """
+    df_result = pd.DataFrame(columns=['year', 'total_admissions'])
+    df_result['year'] = pd.to_datetime(df_bellevue['date_in'])
+    df_result['year'] = df_result['year'].dt.year
+    total_admissions = df_result.groupby('year').size().reset_index(name='total_admissions')
+    return total_admissions
 
 def task_3():
     """
-    Return a series with gender as index, average age as values.
+    This function returns a series with each gender and average age corresponding to each gender.
     """
-    df = df_bellevue.copy()
-
-    if "gender" not in df.columns or "age" not in df.columns:
-        print("Warning: Missing required columns (gender, age).")
-        return pd.Series(dtype=float)
-
-    df["gender"] = df["gender"].astype(str).str.strip().str.upper()
-    avg_age = df.groupby("gender")["age"].mean()
-    return avg_age
-
-
-# # Task 4
+    average_age_by_gender = df_bellevue.groupby('gender')['age'].mean().dropna()
+    return average_age_by_gender
 
 def task_4():
     """
-    Return a list of the 5 most common professions in order of prevalence.
-    Ignores missing values.
+    This function returns a series with each gender with top 5 professions corresponding to each gender. 
     """
-    df = df_bellevue.copy()
-
-    if "profession" not in df.columns:
-        print("Warning: No 'profession' column found.")
-        return []
-
-    # Strip and lowercase, but keep NaN as NaN
-    df["profession_clean"] = df["profession"].str.strip().str.lower()
-
-    # Drop missing values before counting
-    common_prof = (
-        df["profession_clean"]
-        .dropna()
-        .value_counts()
-        .head(5)
-        .index
-        .tolist()
-    )
-
-    print("Cleaned profession column: lowercased and stripped whitespace (NaNs ignored).")
-    return common_prof
-
-
+    top_5_professions = df_bellevue['profession'].value_counts().head(5).index.tolist()
+    return top_5_professions
